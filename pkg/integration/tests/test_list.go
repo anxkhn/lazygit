@@ -505,6 +505,7 @@ var tests = []*components.IntegrationTest{
 	worktree.BareRepoWorktreeConfig,
 	worktree.Crud,
 	worktree.CustomCommand,
+	worktree.DefaultPathTilde,
 	worktree.DetachWorktreeFromBranch,
 	worktree.DotfileBareRepo,
 	worktree.DoubleNestedLinkedSubmodule,

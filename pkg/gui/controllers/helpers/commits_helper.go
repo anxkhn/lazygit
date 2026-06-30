@@ -9,6 +9,7 @@ import (
 	"github.com/jesseduffield/lazygit/pkg/commands/git_commands"
 	"github.com/jesseduffield/lazygit/pkg/gocui"
 	"github.com/jesseduffield/lazygit/pkg/gui/types"
+	"github.com/jesseduffield/lazygit/pkg/utils"
 	"github.com/samber/lo"
 )
 
@@ -245,6 +246,14 @@ func (self *CommitsHelper) OpenCommitMenu(suggestionFunc func(string) []*types.S
 			},
 			Keys: menuKey('p'),
 		},
+		{
+			Label: self.c.Tr.GenerateCommitMessage,
+			OnPress: func() error {
+				return self.generateCommitMessage()
+			},
+			Keys:           menuKey('g'),
+			DisabledReason: self.disabledReasonForGenerateCommitMessage(),
+		},
 	}
 	return self.c.Menu(types.CreateMenuOptions{
 		Title: self.c.Tr.CommitMenuTitle,
@@ -285,4 +294,66 @@ func (self *CommitsHelper) pasteCommitMessageFromClipboard() error {
 			return nil
 		},
 	})
+}
+
+func (self *CommitsHelper) disabledReasonForGenerateCommitMessage() *types.DisabledReason {
+	if !self.c.UserConfig().Git.Commit.GenerateMessage.Enabled {
+		return &types.DisabledReason{Text: self.c.Tr.GenerateCommitMessageDisabled}
+	}
+	return nil
+}
+
+func (self *CommitsHelper) generateCommitMessage() error {
+	config := self.c.UserConfig().Git.Commit.GenerateMessage
+
+	diff, err := self.c.Git().Diff.GetDiff(true)
+	if err != nil {
+		return err
+	}
+	if strings.TrimSpace(diff) == "" {
+		return errors.New(self.c.Tr.NoStagedFilesToGenerateCommitMessage)
+	}
+
+	command := config.Command
+	if command == "" {
+		command = "copilot"
+	}
+
+	cmdArgs := []string{command, "-p", config.Prompt + "\n\n" + diff, "-s", "--allow-all-tools", "--no-ask-user"}
+	if config.Model != "" {
+		cmdArgs = append(cmdArgs, "--model", config.Model)
+	}
+
+	return self.c.WithWaitingStatus(self.c.Tr.GeneratingCommitMessageStatus, func(gocui.Task) error {
+		output, err := self.c.OS().Cmd.New(cmdArgs).DontLog().RunWithOutput()
+		if err != nil {
+			return errors.New(utils.ResolvePlaceholderString(
+				self.c.Tr.GenerateCommitMessageError,
+				map[string]string{"error": strings.TrimSpace(output + "\n" + err.Error())},
+			))
+		}
+
+		message := stripMarkdownCodeFence(output)
+		if message == "" {
+			return errors.New(self.c.Tr.GenerateCommitMessageEmptyResult)
+		}
+
+		self.c.OnUIThread(func() error {
+			self.SetMessageAndDescriptionInView(message)
+			return nil
+		})
+		return nil
+	})
+}
+
+// stripMarkdownCodeFence removes a single surrounding markdown code fence, which
+// some Copilot models wrap their answer in despite being asked for the commit
+// message only. Without this the fence lines would end up in the commit.
+func stripMarkdownCodeFence(message string) string {
+	message = strings.TrimSpace(message)
+	lines := strings.Split(message, "\n")
+	if len(lines) >= 2 && strings.HasPrefix(lines[0], "```") && strings.TrimSpace(lines[len(lines)-1]) == "```" {
+		message = strings.TrimSpace(strings.Join(lines[1:len(lines)-1], "\n"))
+	}
+	return message
 }

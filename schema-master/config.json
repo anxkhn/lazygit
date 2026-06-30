@@ -19,6 +19,10 @@
           "type": "integer",
           "description": "If autoWrapCommitMessage is true, the width to wrap to",
           "default": 72
+        },
+        "generateMessage": {
+          "$ref": "#/$defs/GenerateCommitMessageConfig",
+          "description": "Config for generating commit messages from the staged diff with the GitHub Copilot CLI"
         }
       },
       "additionalProperties": false,
@@ -313,6 +317,32 @@
       "additionalProperties": false,
       "type": "object",
       "description": "Custom icons for filenames and file extensions\nSee https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#custom-files-icon--color"
+    },
+    "GenerateCommitMessageConfig": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "If true, show the 'Generate message (Copilot)' item in the commit menu (opened with the commitMenu keybinding). It runs the GitHub Copilot CLI on the staged diff and prefills the commit message. The CLI must be installed and signed in (see https://github.com/github/copilot-cli).",
+          "default": false
+        },
+        "command": {
+          "type": "string",
+          "description": "The GitHub Copilot CLI command to invoke. Can be a bare command on your PATH or an absolute path.",
+          "default": "copilot"
+        },
+        "model": {
+          "type": "string",
+          "description": "The model passed to the Copilot CLI via its '--model' flag. Leave empty to use Copilot's default model."
+        },
+        "prompt": {
+          "type": "string",
+          "description": "The instruction sent to Copilot. The staged diff is appended after a blank line.",
+          "default": "Write a concise Conventional Commits message for this staged diff. Output only the commit message."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Config for generating commit messages from the staged diff with the GitHub Copilot CLI"
     },
     "GitConfig": {
       "properties": {

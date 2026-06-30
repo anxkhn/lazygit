@@ -399,6 +399,27 @@ git:
     # If autoWrapCommitMessage is true, the width to wrap to
     autoWrapWidth: 72
 
+    # Config for generating commit messages from the staged diff with the GitHub
+    # Copilot CLI
+    generateMessage:
+      # If true, show the 'Generate message (Copilot)' item in the commit menu (opened
+      # with the commitMenu keybinding). It runs the GitHub Copilot CLI on the staged
+      # diff and prefills the commit message. The CLI must be installed and signed in
+      # (see https://github.com/github/copilot-cli).
+      enabled: false
+
+      # The GitHub Copilot CLI command to invoke. Can be a bare command on your PATH
+      # or an absolute path.
+      command: copilot
+
+      # The model passed to the Copilot CLI via its '--model' flag. Leave empty to use
+      # Copilot's default model.
+      model: ""
+
+      # The instruction sent to Copilot. The staged diff is appended after a blank
+      # line.
+      prompt: Write a concise Conventional Commits message for this staged diff. Output only the commit message.
+
   # Config relating to merging
   merging:
     # If true, run merges in a subprocess so that if a commit message is required,

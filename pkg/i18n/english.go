@@ -683,6 +683,12 @@ type TranslationSet struct {
 	CommitURL                             string
 	PasteCommitMessageFromClipboard       string
 	SurePasteCommitMessage                string
+	GenerateCommitMessage                 string
+	GenerateCommitMessageDisabled         string
+	GeneratingCommitMessageStatus         string
+	NoStagedFilesToGenerateCommitMessage  string
+	GenerateCommitMessageEmptyResult      string
+	GenerateCommitMessageError            string
 	CommitMessage                         string
 	CommitMessageBody                     string
 	CommitSubject                         string
@@ -1820,6 +1826,12 @@ func EnglishTranslationSet() *TranslationSet {
 		CommitURL:                                "Commit URL",
 		PasteCommitMessageFromClipboard:          "Paste commit message from clipboard",
 		SurePasteCommitMessage:                   "Pasting will overwrite the current commit message, continue?",
+		GenerateCommitMessage:                    "Generate message (Copilot)",
+		GenerateCommitMessageDisabled:            "Enable git.commit.generateMessage.enabled in your config to use this. Requires the GitHub Copilot CLI to be installed and signed in.",
+		GeneratingCommitMessageStatus:            "Generating commit message with Copilot",
+		NoStagedFilesToGenerateCommitMessage:     "No staged changes to generate a commit message from",
+		GenerateCommitMessageEmptyResult:         "Copilot returned an empty commit message",
+		GenerateCommitMessageError:               "Failed to generate commit message: {{.error}}",
 		CommitMessage:                            "Commit message (subject and body)",
 		CommitMessageBody:                        "Commit message body",
 		CommitSubject:                            "Commit subject",

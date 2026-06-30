@@ -388,6 +388,19 @@ type CommitConfig struct {
 	AutoWrapCommitMessage bool `yaml:"autoWrapCommitMessage"`
 	// If autoWrapCommitMessage is true, the width to wrap to
 	AutoWrapWidth int `yaml:"autoWrapWidth"`
+	// Config for generating commit messages from the staged diff with the GitHub Copilot CLI
+	GenerateMessage GenerateCommitMessageConfig `yaml:"generateMessage"`
+}
+
+type GenerateCommitMessageConfig struct {
+	// If true, show the 'Generate message (Copilot)' item in the commit menu (opened with the commitMenu keybinding). It runs the GitHub Copilot CLI on the staged diff and prefills the commit message. The CLI must be installed and signed in (see https://github.com/github/copilot-cli).
+	Enabled bool `yaml:"enabled"`
+	// The GitHub Copilot CLI command to invoke. Can be a bare command on your PATH or an absolute path.
+	Command string `yaml:"command"`
+	// The model passed to the Copilot CLI via its '--model' flag. Leave empty to use Copilot's default model.
+	Model string `yaml:"model"`
+	// The instruction sent to Copilot. The staged diff is appended after a blank line.
+	Prompt string `yaml:"prompt"`
 }
 
 type MergingConfig struct {
@@ -927,6 +940,12 @@ func GetDefaultConfigForPlatform(platform string) *UserConfig {
 				SignOff:               false,
 				AutoWrapCommitMessage: true,
 				AutoWrapWidth:         72,
+				GenerateMessage: GenerateCommitMessageConfig{
+					Enabled: false,
+					Command: "copilot",
+					Model:   "",
+					Prompt:  "Write a concise Conventional Commits message for this staged diff. Output only the commit message.",
+				},
 			},
 			Merging: MergingConfig{
 				ManualCommit:       false,
